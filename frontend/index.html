@@ -1,0 +1,53 @@
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<div id="app">
+    <h1>{{ title }}</h1>
+    <input id="newNotes" />&nbsp;
+    <button @click="addNewNotes()">Add Notes</button>
+    <p v-for="note in notes" :key="note.id">
+        <b>* {{ note.des }}</b>
+        <button @click="deleteNotes(note.id)">Delete</button>
+    </p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js" integrity="sha512-PJa3oQSLWRB7wHZ7GQ/g+qyv6r4mbuhmiDb8BjSFZ8NZ2a42oTtAq5n0ucWAwcQDlikAtkub+tPVCw4np27WCg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+  const { createApp, ref } = Vue
+  const API_URL="http://localhost:5038/"
+
+  createApp({
+    data() {
+      return {
+        title: "Hello World!",
+        notes: []
+      }
+    },
+    methods: {
+      async refreshData() {
+        axios.get(API_URL + "backend/applcation/GetNotes").then((response) => {
+          this.notes = response.data;
+          console.log(response.data);
+        })
+      },
+      async addNewNotes() {
+        var newNotes = document.getElementById("newNotes").value;
+        const formData = new FormData();
+        formData.append("newNotes", newNotes);
+        axios.post(API_URL + "backend/applcation/AddNotes", formData).then((response) => {
+          this.refreshData();
+          alert(response.data);
+        })
+      },
+      async deleteNotes(id) { // Pass id as a parameter
+        axios.delete(API_URL + "backend/applcation/DeleteNotes", { params: { id: id } }).then((response) => {
+            this.refreshData();
+            alert(response.data);
+        })
+      },
+    },
+    mounted: function() {
+      this.refreshData();
+    }
+  }).mount('#app')
+</script>
